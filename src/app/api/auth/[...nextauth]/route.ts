@@ -1,9 +1,9 @@
-import NextAuth from "next-auth"
+import NextAuth, { AuthOptions } from "next-auth"
 import EmailProvider from "next-auth/providers/email"
 import { MongoDBAdapter } from "@next-auth/mongodb-adapter"
 import clientPromise from "@/lib/mongodb"
 
-const handler = NextAuth({
+export const authOptions: AuthOptions = {
   adapter: MongoDBAdapter(clientPromise),
   providers: [
     EmailProvider({
@@ -23,7 +23,9 @@ const handler = NextAuth({
       return session
     }
   }
-})
+}
+
+const handler = NextAuth(authOptions)
 
 export { handler as GET, handler as POST }
 
