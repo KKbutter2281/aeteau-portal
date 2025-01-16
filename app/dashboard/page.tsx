@@ -1,9 +1,9 @@
 'use client'
 
 import { useSession } from 'next-auth/react'
-import ApplicantDashboard from '../components/ApplicantDashboard'
-import StaffDashboard from '../components/StaffDashboard'
-import AdminDashboard from '../components/AdminDashboard'
+import ApplicantDashboard from '@/components/ApplicantDashboard'
+import StaffDashboard from '@/components/StaffDashboard'
+import AdminDashboard from '@/components/AdminDashboard'
 
 export default function Dashboard() {
   const { data: session } = useSession()
