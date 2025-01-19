@@ -27,3 +27,20 @@ export async function getBlobData(path: string) {
 
   return response.json();
 }
+
+export async function createUser(email: string, password: string, role: string) {
+  // Implementation for creating a user
+  const response = await fetch('https://user-service-url/create', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ email, password, role }),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to create user');
+  }
+
+  return response.json();
+}
