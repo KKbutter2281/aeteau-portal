@@ -1,54 +1,55 @@
-'use client'
+'use client';
 
-import { useState, Suspense } from 'react'
-import { signIn } from 'next-auth/react'
-import Link from 'next/link'
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useState, Suspense } from 'react';
+import { signIn } from 'next-auth/react';
+import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface SignInResult {
-  error: string | null
-  ok: boolean
-  status: number
-  url: string | null
+  error: string | null;
+  ok: boolean;
+  status: number;
+  url: string | null;
 }
 
 function LoginForm() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState('')
-  const searchParams = new URLSearchParams(window.location.search)
-  const callbackUrl = searchParams.get('callbackUrl') || '/dashboard'
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams?.get('callbackUrl') || '/dashboard';
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError('')
+    e.preventDefault();
+    setIsLoading(true);
+    setError('');
 
     try {
-      const result = await signIn('credentials', {
+      const result = (await signIn('credentials', {
         redirect: false,
         email,
         password,
-      }) as SignInResult
+      })) as SignInResult;
 
       if (result?.error) {
-        setError(result.error)
+        setError(result.error);
       } else if (result?.ok) {
-        window.location.href = callbackUrl
+        window.location.href = callbackUrl;
       } else {
-        setError('An unexpected error occurred')
+        setError('An unexpected error occurred');
       }
     } catch (err) {
-      console.error('Sign in error:', err)
-      setError('An unexpected error occurred')
+      console.error('Sign in error:', err);
+      setError('An unexpected error occurred');
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <Card className="w-full">
@@ -61,7 +62,7 @@ function LoginForm() {
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <label htmlFor="email" className="text-sm font-medium">
@@ -76,7 +77,7 @@ function LoginForm() {
               disabled={isLoading}
             />
           </div>
-          
+
           <div className="space-y-2">
             <label htmlFor="password" className="text-sm font-medium">
               Password
@@ -91,11 +92,7 @@ function LoginForm() {
             />
           </div>
 
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={isLoading}
-          >
+          <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? 'Signing in...' : 'Sign in'}
           </Button>
         </form>
@@ -107,29 +104,30 @@ function LoginForm() {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
 
 export default function Login() {
   return (
     <div className="container mx-auto p-4 max-w-md">
-      <Suspense fallback={
-        <Card>
-          <CardContent className="p-4">
-            <div className="animate-pulse space-y-4">
-              <div className="h-4 bg-gray-200 rounded w-1/4"></div>
-              <div className="space-y-2">
-                <div className="h-4 bg-gray-200 rounded"></div>
-                <div className="h-4 bg-gray-200 rounded"></div>
+      <Suspense
+        fallback={
+          <Card>
+            <CardContent className="p-4">
+              <div className="animate-pulse space-y-4">
+                <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+                <div className="space-y-2">
+                  <div className="h-4 bg-gray-200 rounded"></div>
+                  <div className="h-4 bg-gray-200 rounded"></div>
+                </div>
+                <div className="h-8 bg-gray-200 rounded"></div>
               </div>
-              <div className="h-8 bg-gray-200 rounded"></div>
-            </div>
-          </CardContent>
-        </Card>
-      }>
+            </CardContent>
+          </Card>
+        }
+      >
         <LoginForm />
       </Suspense>
     </div>
-  )
+  );
 }
-
