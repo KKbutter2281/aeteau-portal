@@ -1,27 +1,29 @@
-import { putBlobData, getBlobData } from '@/lib/blob-storage'
-import { hashPassword } from '@/lib/auth'
-import { v4 as uuidv4 } from 'uuid'
+export async function putBlobData(path: string, data: any, options = { access: 'private' }) {
+  // Upload data to blob storage
+  const response = await fetch(`https://blob-service-url/${path}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ ...data, access: options.access }),
+  });
 
-export async function createUser(email: string, password: string, role: string) {
-  try {
-    const hashedPassword = await hashPassword(password)
-    const userId = uuidv4()
-    const user = { id: userId, email, password: hashedPassword, role }
-    await putBlobData(`users/${userId}`, user)
-    return user
-  } catch (err) {
-    console.error('Error creating user:', err)
-    throw err
+  if (!response.ok) {
+    throw new Error(`Failed to upload data to ${path}`);
   }
+
+  return response.json();
 }
 
-export async function getUserByEmail(email: string) {
-  try {
-    const users = await getBlobData('users/')
-    return users.find(user => user.email === email) || null
-  } catch (err) {
-    console.error('Error getting user by email:', err)
-    throw err
-  }
-}
+export async function getBlobData(path: string) {
+  // Retrieve data from blob storage
+  const response = await fetch(`https://blob-service-url/${path}`, {
+    method: 'GET',
+  });
 
+  if (!response.ok) {
+    throw new Error(`Failed to fetch data from ${path}`);
+  }
+
+  return response.json();
+}
