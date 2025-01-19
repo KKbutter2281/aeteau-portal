@@ -1,14 +1,12 @@
 import { NextResponse } from 'next/server'
-import { list, get } from '@vercel/blob'
+import { getBlobData } from '@/lib/blob-storage'
 
 export async function GET() {
   try {
-    const { blobs } = await list({ prefix: 'applications/' })
-    const applications = await Promise.all(
-      blobs.map(async (blob) => JSON.parse(await get(blob.url)))
-    )
+    const applications = await getBlobData('applications/')
     return NextResponse.json(applications)
-  } catch (error) {
+  } catch (err) {
+    console.error('Error fetching applications:', err)
     return NextResponse.json({ message: 'Error fetching applications' }, { status: 500 })
   }
 }

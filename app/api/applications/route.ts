@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
-import { put, list, get } from '@vercel/blob'
+import { put, list } from '@vercel/blob'
 import { v4 as uuidv4 } from 'uuid'
+import { getBlobData, putBlobData } from '@/lib/blob-storage'
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
@@ -13,7 +14,7 @@ export async function GET(req: Request) {
   try {
     const { blobs } = await list({ prefix: `applications/${userId}/` })
     const applications = await Promise.all(
-      blobs.map(async (blob) => JSON.parse(await get(blob.url)))
+      blobs.map(async (blob) => JSON.parse(await getBlobData(blob.url)))
     )
     return NextResponse.json(applications)
   } catch (error) {
@@ -44,10 +45,10 @@ export async function POST(req: Request) {
       createdAt: new Date().toISOString(),
     }
 
-    await put(`applications/${userId}/${applicationId}`, JSON.stringify(application), { access: 'private' })
+    await putBlobData(`applications/${userId}/${applicationId}`, JSON.stringify(application), { access: 'private' })
 
     if (transcript) {
-      await put(`applications/${userId}/${applicationId}/transcript`, transcript, { access: 'private' })
+      await putBlobData(`applications/${userId}/${applicationId}/transcript`, transcript, { access: 'private' })
     }
 
     return NextResponse.json({ message: 'Application submitted successfully', applicationId }, { status: 201 })

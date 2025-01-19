@@ -1,6 +1,6 @@
-import { getServerSession } from 'next-auth/next'
+import { getServerSession } from 'next-auth'
 import { NextResponse } from 'next/server'
-import { handler as authOptions } from '../../auth/[...nextauth]/route'
+import { authOptions } from '@/lib/auth-options'
 
 export async function GET() {
   const session = await getServerSession(authOptions)

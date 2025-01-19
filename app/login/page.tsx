@@ -9,12 +9,18 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
+interface SignInResult {
+  error: string | null
+  ok: boolean
+  status: number
+  url: string | null
+}
+
 export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
-  const [debugInfo, setDebugInfo] = useState<any>(null)
   const router = useRouter()
   const searchParams = useSearchParams()
   const callbackUrl = searchParams.get('callbackUrl') || '/dashboard'
@@ -23,16 +29,13 @@ export default function Login() {
     e.preventDefault()
     setIsLoading(true)
     setError('')
-    setDebugInfo(null)
 
     try {
       const result = await signIn('credentials', {
         redirect: false,
         email,
         password,
-      })
-
-      setDebugInfo(result) // Store the result for debugging
+      }) as SignInResult
 
       if (result?.error) {
         setError(result.error)
@@ -41,10 +44,9 @@ export default function Login() {
       } else {
         setError('An unexpected error occurred')
       }
-    } catch (error) {
-      console.error('Sign in error:', error)
+    } catch (err) {
+      console.error('Sign in error:', err)
       setError('An unexpected error occurred')
-      setDebugInfo(error)
     } finally {
       setIsLoading(false)
     }
@@ -103,18 +105,9 @@ export default function Login() {
 
           <div className="text-center text-sm">
             <Link href="/register" className="text-blue-600 hover:text-blue-500">
-              Don't have an account? Register here
+              Don&apos;t have an account? Register here
             </Link>
           </div>
-
-          {process.env.NODE_ENV === 'development' && debugInfo && (
-            <div className="mt-4">
-              <h3 className="text-sm font-semibold">Debug Information:</h3>
-              <pre className="text-xs bg-gray-100 p-2 rounded mt-1 overflow-auto">
-                {JSON.stringify(debugInfo, null, 2)}
-              </pre>
-            </div>
-          )}
         </CardContent>
       </Card>
     </div>

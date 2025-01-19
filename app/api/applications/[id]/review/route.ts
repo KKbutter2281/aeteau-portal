@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { get, put } from '@vercel/blob'
+import { getBlobData, putBlobData } from '@/lib/blob-storage'
 
 export async function POST(req: Request, { params }: { params: { id: string } }) {
   const { decision, comment } = await req.json()
@@ -9,16 +9,19 @@ export async function POST(req: Request, { params }: { params: { id: string } })
   }
 
   try {
-    const applicationBlob = await get(`applications/${params.id}`)
-    const application = JSON.parse(await applicationBlob.text())
-
+    const applications = await getBlobData(`applications/${params.id}`)
+    if (applications.length === 0) {
+      return NextResponse.json({ message: 'Application not found' }, { status: 404 })
+    }
+    const application = applications[0]
     application.status = decision
     application.comment = comment
 
-    await put(`applications/${params.id}`, JSON.stringify(application), { access: 'private' })
+    await putBlobData(`applications/${params.id}`, application)
 
     return NextResponse.json({ message: 'Application review submitted successfully' }, { status: 200 })
-  } catch (error) {
+  } catch (err) {
+    console.error('Error submitting application review:', err)
     return NextResponse.json({ message: 'Error submitting application review' }, { status: 500 })
   }
 }

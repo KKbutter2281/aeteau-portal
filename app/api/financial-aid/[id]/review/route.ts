@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { get, put } from '@vercel/blob'
+import { getBlobData, putBlobData } from '@/lib/blob-storage'
 
 export async function POST(req: Request, { params }: { params: { id: string } }) {
   const { decision, amountAwarded, comment } = await req.json()
@@ -9,7 +9,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
   }
 
   try {
-    const applicationBlob = await get(`financial-aid/${params.id}`)
+    const applicationBlob = await getBlobData(`financial-aid/${params.id}`)
     const application = JSON.parse(await applicationBlob.text())
 
     application.status = decision
@@ -18,7 +18,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
       application.amountAwarded = amountAwarded
     }
 
-    await put(`financial-aid/${params.id}`, JSON.stringify(application), { access: 'private' })
+    await putBlobData(`financial-aid/${params.id}`, JSON.stringify(application), { access: 'private' })
 
     return NextResponse.json({ message: 'Financial aid review submitted successfully' }, { status: 200 })
   } catch (error) {

@@ -17,7 +17,7 @@ export default function TestPage() {
       const response = await fetch('/api/test/protected')
       const data = await response.json()
       setTestResult(JSON.stringify(data, null, 2))
-    } catch (error) {
+    } catch {
       setTestResult('Error accessing protected API')
     }
   }

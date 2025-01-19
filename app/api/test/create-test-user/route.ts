@@ -3,7 +3,7 @@ import { hashPassword } from '@/lib/auth'
 import { put } from '@vercel/blob'
 import { v4 as uuidv4 } from 'uuid'
 
-export async function POST(req: Request) {
+export async function POST() {
   // Only allow in development
   if (process.env.NODE_ENV !== 'development') {
     return new NextResponse('Not allowed in production', { status: 403 })

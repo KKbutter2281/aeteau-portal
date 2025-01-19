@@ -24,7 +24,8 @@ export async function POST(req: Request) {
     await put(`financial-aid/${userId}/${applicationId}`, JSON.stringify(application), { access: 'private' })
 
     return NextResponse.json({ message: 'Financial aid application submitted successfully' }, { status: 201 })
-  } catch (error) {
+  } catch (err) {
+    console.error('Error submitting financial aid application:', err)
     return NextResponse.json({ message: 'Error submitting financial aid application' }, { status: 500 })
   }
 }
