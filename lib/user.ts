@@ -1,6 +1,8 @@
+import { put, get } from '@vercel/blob';
+
 export async function putBlobData(path: string, data: any, options = { access: 'private' }) {
-  // Upload data to blob storage
-  const response = await fetch(`https://blob-service-url/${path}`, {
+  // Upload data to Vercel Blob
+  const response = await put(`https://blob-service-url/${path}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -16,8 +18,8 @@ export async function putBlobData(path: string, data: any, options = { access: '
 }
 
 export async function getBlobData(path: string) {
-  // Retrieve data from blob storage
-  const response = await fetch(`https://blob-service-url/${path}`, {
+  // Retrieve data from Vercel Blob
+  const response = await get(`https://blob-service-url/${path}`, {
     method: 'GET',
   });
 
@@ -30,11 +32,10 @@ export async function getBlobData(path: string) {
 
 export async function createUser(email: string, password: string, role: string) {
   // Implementation for creating a user
-  const response = await fetch('https://user-service-url/create', {
+  const userServiceUrl = 'https://your-valid-service-url';
+  const response = await fetch(`${userServiceUrl}/create`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password, role }),
   });
 
