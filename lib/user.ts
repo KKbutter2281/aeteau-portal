@@ -1,47 +1,27 @@
-import { put, get } from '@vercel/blob';
-
-export async function putBlobData(path: string, data: any, options = { access: 'private' }) {
-  // Upload data to Vercel Blob
-  const response = await put(`https://blob-service-url/${path}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ ...data, access: options.access }),
-  });
-
-  if (!response.ok) {
-    throw new Error(`Failed to upload data to ${path}`);
-  }
-
-  return response.json();
-}
-
-export async function getBlobData(path: string) {
-  // Retrieve data from Vercel Blob
-  const response = await get(`https://blob-service-url/${path}`, {
-    method: 'GET',
-  });
-
-  if (!response.ok) {
-    throw new Error(`Failed to fetch data from ${path}`);
-  }
-
-  return response.json();
-}
+import { putBlobData, getBlobData } from '@/lib/blob-storage'
+import { hashPassword } from '@/lib/auth'
+import { v4 as uuidv4 } from 'uuid'
 
 export async function createUser(email: string, password: string, role: string) {
-  // Implementation for creating a user
-  const userServiceUrl = 'https://your-valid-service-url';
-  const response = await fetch(`${userServiceUrl}/create`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password, role }),
-  });
-
-  if (!response.ok) {
-    throw new Error('Failed to create user');
+  try {
+    const hashedPassword = await hashPassword(password)
+    const userId = uuidv4()
+    const user = { id: userId, email, password: hashedPassword, role }
+    await putBlobData(`users/${userId}`, user)
+    return user
+  } catch (err) {
+    console.error('Error creating user:', err)
+    throw err
   }
-
-  return response.json();
 }
+
+export async function getUserByEmail(email: string) {
+  try {
+    const users = await getBlobData('users/')
+    return users.find(user => user.email === email) || null
+  } catch (err) {
+    console.error('Error getting user by email:', err)
+    throw err
+  }
+}
+
