@@ -1,15 +1,15 @@
-import { NextAuthOptions } from 'next-auth'
-import CredentialsProvider from 'next-auth/providers/credentials'
-import { verifyPassword } from '@/lib/auth'
-import { getUserByEmail } from '@/lib/user'
+import type { NextAuthOptions } from "next-auth"
+import CredentialsProvider from "next-auth/providers/credentials"
+import { verifyPassword } from "@/lib/auth"
+import { getUserByEmail } from "@/lib/user"
 
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
-      name: 'Credentials',
+      name: "Credentials",
       credentials: {
         email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" }
+        password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
         try {
@@ -35,18 +35,18 @@ export const authOptions: NextAuthOptions = {
             role: user.role,
           }
         } catch (err) {
-          console.error('Auth error:', err)
+          console.error("Auth error:", err)
           return null
         }
-      }
-    })
+      },
+    }),
   ],
   pages: {
-    signIn: '/login',
-    error: '/auth/error',
+    signIn: "/login",
+    error: "/auth/error",
   },
   session: {
-    strategy: 'jwt',
+    strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   callbacks: {
@@ -65,7 +65,7 @@ export const authOptions: NextAuthOptions = {
         session.user.role = token.role as string
       }
       return session
-    }
+    },
   },
 }
 
