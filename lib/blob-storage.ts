@@ -1,8 +1,8 @@
-import { list, put, del } from '@vercel/blob'
+import { list, put, del } from "@vercel/blob"
 
 export async function putBlobData(path: string, data: unknown) {
   try {
-    const blob = await put(path, JSON.stringify(data), { access: 'private' })
+    const blob = await put(path, JSON.stringify(data), { access: "public" })
     return blob
   } catch (err) {
     console.error(`Error putting blob data at ${path}:`, err)
