@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { signIn, useSession } from "next-auth/react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
@@ -23,12 +23,14 @@ export default function Login() {
   const [error, setError] = useState("")
   const router = useRouter()
   const { data: session, status } = useSession()
+  const searchParams = useSearchParams()
+  const from = searchParams.get("from") || "/dashboard"
 
   useEffect(() => {
     if (status === "authenticated") {
-      router.push("/dashboard")
+      router.push(from)
     }
-  }, [status, router])
+  }, [status, router, from])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -45,7 +47,7 @@ export default function Login() {
       if (result?.error) {
         setError(result.error)
       } else if (result?.ok) {
-        router.push("/dashboard")
+        router.push(from)
       } else {
         setError("An unexpected error occurred")
       }
