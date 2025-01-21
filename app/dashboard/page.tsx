@@ -1,22 +1,47 @@
 "use client"
 
-import { useSession } from "next-auth/react"
+import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import { ApplicantDashboard } from "@/components/ApplicantDashboard"
 import { StaffDashboard } from "@/components/StaffDashboard"
 import { AdminDashboard } from "@/components/AdminDashboard"
 
 export default function Dashboard() {
-  const { data: session, status } = useSession()
+  const [isLoading, setIsLoading] = useState(true)
+  const [user, setUser] = useState(null)
+  const router = useRouter()
 
-  if (status === "loading") {
+  useEffect(() => {
+    const checkLoginStatus = async () => {
+      try {
+        const response = await fetch("/api/login-check")
+        const data = await response.json()
+
+        if (data.isLoggedIn) {
+          setUser(data.user)
+        } else {
+          router.push("/login")
+        }
+      } catch (error) {
+        console.error("Error checking login status:", error)
+        router.push("/login")
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    checkLoginStatus()
+  }, [router])
+
+  if (isLoading) {
     return <div>Loading...</div>
   }
 
-  if (!session?.user) {
+  if (!user) {
     return null
   }
 
-  switch (session.user.role) {
+  switch (user.role) {
     case "applicant":
       return <ApplicantDashboard />
     case "staff":
