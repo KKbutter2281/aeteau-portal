@@ -1,19 +1,12 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { signIn, useSession } from "next-auth/react"
+import { useState } from "react"
+import { signIn } from "next-auth/react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-
-interface SignInResult {
-  error: string | null
-  ok: boolean
-  status: number
-  url: string | null
-}
 
 export function LoginForm() {
   const [email, setEmail] = useState("")
@@ -21,15 +14,8 @@ export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const router = useRouter()
-  const { data: session, status } = useSession()
   const searchParams = useSearchParams()
   const from = searchParams?.get("from") || "/dashboard"
-
-  useEffect(() => {
-    if (status === "authenticated") {
-      router.push(from)
-    }
-  }, [status, router, from])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -37,16 +23,17 @@ export function LoginForm() {
     setError("")
 
     try {
-      const result = (await signIn("credentials", {
+      const result = await signIn("credentials", {
         redirect: false,
         email,
         password,
-      })) as SignInResult
+      })
 
       if (result?.error) {
         setError(result.error)
       } else if (result?.ok) {
         router.push(from)
+        router.refresh()
       } else {
         setError("An unexpected error occurred")
       }
@@ -56,14 +43,6 @@ export function LoginForm() {
     } finally {
       setIsLoading(false)
     }
-  }
-
-  if (status === "loading") {
-    return <div>Loading...</div>
-  }
-
-  if (status === "authenticated") {
-    return null
   }
 
   return (
