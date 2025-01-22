@@ -33,7 +33,6 @@ export function LoginForm() {
         setError(result.error)
       } else if (result?.ok) {
         router.push(from)
-        router.refresh()
       } else {
         setError("An unexpected error occurred")
       }
