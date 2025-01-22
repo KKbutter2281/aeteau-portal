@@ -2,20 +2,22 @@
 
 import { useState } from "react"
 import { signIn } from "next-auth/react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 
-export function LoginForm() {
+interface LoginFormProps {
+  from: string
+}
+
+export function LoginForm({ from }: LoginFormProps) {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const from = searchParams?.get("from") || "/dashboard"
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -33,6 +35,7 @@ export function LoginForm() {
         setError(result.error)
       } else if (result?.ok) {
         router.push(from)
+        router.refresh()
       } else {
         setError("An unexpected error occurred")
       }
