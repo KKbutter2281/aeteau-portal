@@ -14,19 +14,19 @@ export const authOptions: NextAuthOptions = {
       async authorize(credentials) {
         try {
           if (!credentials?.email || !credentials?.password) {
-            throw new Error("Missing credentials")
+            return null
           }
 
           const user = await getUserByEmail(credentials.email)
 
           if (!user) {
-            throw new Error("Invalid credentials")
+            return null
           }
 
           const isValid = await verifyPassword(credentials.password, user.password)
 
           if (!isValid) {
-            throw new Error("Invalid credentials")
+            return null
           }
 
           return {
@@ -66,6 +66,17 @@ export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60, // 30 days
+  },
+  cookies: {
+    sessionToken: {
+      name: `__Secure-next-auth.session-token`,
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: true,
+      },
+    },
   },
 }
 

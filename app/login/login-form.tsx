@@ -31,11 +31,11 @@ export function LoginForm({ from }: LoginFormProps) {
         password,
       })
 
-      if (!result?.error) {
+      if (result?.error) {
+        setError("Invalid email or password")
+      } else {
         router.push(from)
         router.refresh()
-      } else {
-        setError("Invalid email or password")
       }
     } catch (err) {
       console.error("Sign in error:", err)
