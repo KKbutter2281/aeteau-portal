@@ -14,19 +14,19 @@ export const authOptions: NextAuthOptions = {
       async authorize(credentials) {
         try {
           if (!credentials?.email || !credentials?.password) {
-            return null
+            throw new Error("Missing credentials")
           }
 
           const user = await getUserByEmail(credentials.email)
 
           if (!user) {
-            return null
+            throw new Error("Invalid credentials")
           }
 
           const isValid = await verifyPassword(credentials.password, user.password)
 
           if (!isValid) {
-            return null
+            throw new Error("Invalid credentials")
           }
 
           return {
@@ -43,6 +43,7 @@ export const authOptions: NextAuthOptions = {
   ],
   pages: {
     signIn: "/login",
+    error: "/auth/error",
   },
   callbacks: {
     async jwt({ token, user }) {
@@ -64,6 +65,7 @@ export const authOptions: NextAuthOptions = {
   },
   session: {
     strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
 }
 
