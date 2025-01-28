@@ -1,42 +1,65 @@
-"use client"
+import { getServerSession } from "next-auth/next"
+import { authOptions } from "../api/auth/[...nextauth]"
+import { redirect } from "next/navigation"
+import { PrismaClient } from "@prisma/client"
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
 
-import { useEffect, useState } from "react"
-import { useSession } from "next-auth/react"
-import { useRouter } from "next/navigation"
-import { ApplicantDashboard } from "@/components/ApplicantDashboard"
-import { StaffDashboard } from "@/components/StaffDashboard"
-import { AdminDashboard } from "@/components/AdminDashboard"
+const prisma = new PrismaClient()
 
-export default function Dashboard() {
-  const { data: session, status } = useSession()
-  const router = useRouter()
-  const [isLoading, setIsLoading] = useState(true)
+export default async function Dashboard() {
+  const session = await getServerSession(authOptions)
 
-  useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/login")
-    } else if (status === "authenticated") {
-      setIsLoading(false)
-    }
-  }, [status, router])
-
-  if (isLoading || status === "loading") {
-    return <div>Loading...</div>
+  if (!session) {
+    redirect("/auth/signin")
   }
 
-  if (!session?.user) {
-    return null
-  }
+  const application = await prisma.application.findFirst({
+    where: { userId: session.user.id },
+    orderBy: { submittedAt: "desc" },
+  })
 
-  switch (session.user.role) {
-    case "applicant":
-      return <ApplicantDashboard />
-    case "staff":
-      return <StaffDashboard />
-    case "admin":
-      return <AdminDashboard />
-    default:
-      return <div>Invalid user role.</div>
-  }
+  const financialAid = await prisma.financialAid.findFirst({
+    where: { userId: session.user.id },
+    orderBy: { createdAt: "desc" },
+  })
+
+  return (
+    <div className="container mx-auto p-8">
+      <h1 className="text-2xl font-bold mb-4">Welcome to your dashboard, {session.user.name}</h1>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="bg-white p-6 rounded shadow">
+          <h2 className="text-xl font-semibold mb-4">Application Status</h2>
+          {application ? (
+            <>
+              <p>Status: {application.status}</p>
+              <p>Submitted: {application.submittedAt?.toLocaleDateString()}</p>
+            </>
+          ) : (
+            <p>You haven't submitted an application yet.</p>
+          )}
+          <Link href="/application">
+            <Button className="mt-4">{application ? "View Application" : "Start Application"}</Button>
+          </Link>
+        </div>
+        <div className="bg-white p-6 rounded shadow">
+          <h2 className="text-xl font-semibold mb-4">Financial Aid Status</h2>
+          {financialAid ? (
+            <>
+              <p>Status: {financialAid.status}</p>
+              {financialAid.awardAmount && <p>Award Amount: ${financialAid.awardAmount.toFixed(2)}</p>}
+            </>
+          ) : (
+            <p>You haven't applied for financial aid yet.</p>
+          )}
+          <Link href="/financial-aid">
+            <Button className="mt-4">
+              {financialAid ? "View Financial Aid Application" : "Apply for Financial Aid"}
+            </Button>
+          </Link>
+        </div>
+      </div>
+    </div>
+  )
 }
 
